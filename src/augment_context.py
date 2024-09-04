@@ -72,7 +72,7 @@ Context:"""
     print("Generated text: ", generated_text)
     
     # Remove the input prompt from the generated text
-    context = generated_text[len(prompt):].strip()
+    context = generated_text.split("[/INST]")[1].strip()
     
     return context
 
