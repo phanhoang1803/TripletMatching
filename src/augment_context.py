@@ -40,8 +40,8 @@ Now, based on the image and these captions, please provide the context:"""
 
     # Create the conversation template
     conversation = [
-        # {"role": "assistant", "content": "You are an AI assistant specializing in analyzing images and text for fact-checking purposes. Your task is to generate contextual information that will help determine if an image-caption pair is genuine or manipulated."},
-        {"role": "user", "content": [{"type": "text", "text": query}, {"type": "image"}]}
+        {"role": "assistant", "content": [{"type": "text", "text": "You are an AI assistant specializing in analyzing images and text for fact-checking purposes. Your task is to generate contextual information that will help determine if an image-caption pair is genuine or manipulated."}]},
+        {"role": "user", "content": [{"type": "text", "text": query}, {"type": "image", "image": image}]}
     ]
     
     # Apply the chat template
