@@ -35,8 +35,8 @@ def generate_context(model, processor, image_path, captions, device):
             "role": "user",
             "content": [
                 {
-                    "type": "text", 
-                 "text": """I'm going to show you an image and provide some captions. Please generate a comprehensive context (4-5 sentences) that:
+                "type": "text", 
+                "text": """I'm going to show you an image and provide some captions. Please generate a comprehensive context (4-5 sentences) that:
 1. Describes the key elements of the image.
 2. Summarizes the main points from the captions.
 3. Highlights any potential discrepancies or alignments between the image and captions.
@@ -68,7 +68,8 @@ def augment_data(data, model, processor, base_image_path, device):
         if not os.path.exists(image_path):
             continue
         captions = [article['caption'] for article in item['articles']]
-        item['context'] = generate_context(model, processor, image_path, captions, device).split("[/INST]")[1].strip()
+        # item['context'] = generate_context(model, processor, image_path, captions, device).split("[/INST]")[1].strip()
+        item['context'] = generate_context(model, processor, image_path, captions, device)
         print("Context: ", item['context'])
     return data
 
