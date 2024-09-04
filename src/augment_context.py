@@ -67,7 +67,7 @@ def main(args):
     print("Setting up the model...")
     device = "cuda" if torch.cuda.is_available() else "cpu"
     model, processor = setup_model(args.model_name, args.use_quantized, args.use_flash_attention)
-    model.to(device)
+    # model.to(device)
     
     print("Augmenting data with AI-generated context...")
     augmented_data = augment_data(data, model, processor, args.base_image_path, device)
