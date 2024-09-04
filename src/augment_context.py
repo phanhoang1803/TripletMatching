@@ -49,7 +49,7 @@ Context:"""
     # Define the conversation template for the AI model
     conversation = [
     {
-        "role": "system",
+        "role": "assistant",
         "content": [
             {
                 "type": "text",
