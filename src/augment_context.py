@@ -28,7 +28,7 @@ def generate_context(model, processor, image_path, captions, device):
     # Prepare the conversation and prompt
     conversation = [
         {
-            "role": "system",
+            "role": "assistant",
             "content": "You are an AI assistant specializing in analyzing images and text for fact-checking purposes. Your task is to generate contextual information that will help determine if an image-caption pair is genuine or manipulated."
         },
         {
