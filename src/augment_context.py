@@ -25,42 +25,26 @@ def generate_context(model, processor, image_path, captions, device):
     # Load the image
     image = Image.open(image_path).convert("RGB")
     
-    # Prepare the conversation and prompt
-    conversation = [
-        {
-            "role": "assistant",
-            "content": "You are an AI assistant specializing in analyzing images and text for fact-checking purposes. Your task is to generate contextual information that will help determine if an image-caption pair is genuine or manipulated."
-        },
-        {
-            "role": "user",
-            "content": [
-                {
-                "type": "text", 
-                "text": """I'm going to show you an image and provide some captions. Please generate a comprehensive context (4-5 sentences) that:
+    # Prepare the prompt
+    prompt = """You are an AI assistant specializing in analyzing images and text for fact-checking purposes. Your task is to generate contextual information that will help determine if an image-caption pair is genuine or manipulated.
+
+I'm going to show you an image and provide some captions. Please generate a comprehensive context (4-5 sentences) that:
 1. Describes the key elements of the image.
 2. Summarizes the main points from the captions.
 3. Highlights any potential discrepancies or alignments between the image and captions.
 4. Provides relevant background information that could help verify the authenticity of the image-caption pair.
 
 Here are the captions: """ + " ".join(captions)
-                },
-                
-                {
-                    "type": "image"
-                },
-            ],
-        },
-    ]
-    prompt = processor.apply_chat_template(conversation, add_generation_prompt=True)
 
     # Process inputs
-    inputs = processor(images=image, text=prompt, return_tensors="pt").to(device)
+    inputs = processor(text=prompt, images=image, return_tensors="pt").to(device)
 
     # Generate context
-    output = model.generate(**inputs, max_new_tokens=200, do_sample=True, temperature=0.7, top_p=0.9)
+    with torch.no_grad():
+        output = model.generate(**inputs, max_new_tokens=200, do_sample=True, temperature=0.7, top_p=0.9)
     
     # Decode and return the generated context
-    return processor.decode(output[0], skip_special_tokens=True)
+    return processor.batch_decode(output, skip_special_tokens=True)[0]
 
 def augment_data(data, model, processor, base_image_path, device):
     for item in tqdm(data, desc="Generating context"):
