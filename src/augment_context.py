@@ -53,6 +53,7 @@ def augment_data(data, model, processor, base_image_path, device):
             continue
         captions = [article['caption'] for article in item['articles']]
         item['context'] = generate_context(model, processor, image_path, captions, device)
+        print("Context: ", item['context'])
     return data
 
 def save_augmented_data(data, output_file):
