@@ -32,11 +32,11 @@ def generate_context(model, processor, image_path, captions, device):
     formatted_captions = "\n".join([f"{i+1}. {caption}" for i, caption in enumerate(unique_captions)])
 
     # Construct the query for image analysis
-    query = f"""Analyze the provided image in relation to the following captions:
+    query = f"""Analyze the provided image in relation to the following captions. These captions can be real or fake news so you need to be selective to give context to the image:
 
 {formatted_captions}
 
-Generate a concise context (4-5 sentences) that describes the image content, infers its source information, and highlights any relevant information that connects the image to the captions.
+Generate a concise context (4-5 sentences) that describes the image content, infers its source information like date, location, and any other relevant information.
 
 Context:"""
 
