@@ -25,8 +25,9 @@ def generate_context(model, processor, image_path, captions, device):
     # Load the image
     image = Image.open(image_path).convert("RGB")
     
+    # Create the query
     numbered_captions = "\n".join([f"{i+1}. {caption}" for i, caption in enumerate(captions)])
-    prompt = f"""I'm going to show you an image and provide some captions. Please generate a comprehensive context (4-5 sentences) that:
+    query = f"""I'm going to show you an image and provide some captions. Please generate a comprehensive context (4-5 sentences) that:
 1. Describes the key elements of the image.
 2. Summarizes the main points from the captions.
 3. Highlights any potential discrepancies or alignments between the image and captions.
@@ -37,11 +38,13 @@ Here are the captions:
     
 Now, based on the image and these captions, please provide the context:"""
 
+    # Create the conversation template
     conversation = [
         {"role": "assistant", "content": "You are an AI assistant specializing in analyzing images and text for fact-checking purposes. Your task is to generate contextual information that will help determine if an image-caption pair is genuine or manipulated."},
-        {"role": "user", "content": [{"type": "text", "text": prompt}, {"type": "image"}]}
+        {"role": "user", "content": [{"type": "text", "text": query}, {"type": "image"}]}
     ]
     
+    # Apply the chat template
     prompt = processor.apply_chat_template(conversation, add_generation_prompt=True)
     
     # Process inputs
