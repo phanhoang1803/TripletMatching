@@ -36,14 +36,14 @@ def generate_context(model, processor, image_path, captions, device):
 Captions:
 {formatted_captions}
 
-Given the the image and the captions associated with it, you need to write a detailed context paragraph based on the image and the captions. There are 4 key points you need to cover to generate the context:
+Given the the image and the captions associated with it, you need to write a detailed context paragraph based on the image and the captions. There are some key points you should cover to generate the context:
 
 1. Describes the key visual elements and content of the image.
-2. Uses the captions to infer the most likely context, setting, or event depicted. Incorporate relevant details from the captions to enhance the description.
+2. Infers the most likely context, setting, or event depicted from the captions. Incorporate relevant details from the captions to enhance the description.
 3. Estimates the time period and possible geographic location, if possible.
-4. Identifies any significant themes or messages conveyed by the image, integrating any insights from the captions.
+4. Identifies any significant themes or messages conveyed by the image, integrating any insights from the captions, if possible.
 
-You need to write only one detailed paragraph of 7 - 10 sentences based on above points. Be specific and confident in your description and inferences. Do not mention limitations in identifying specific individuals or places.
+You have to write the context in a single paragraph of 7 - 10 sentences. Be specific and confident in your description and inferences. Do not mention limitations in identifying specific individuals or places.
 
 Context:"""
 
