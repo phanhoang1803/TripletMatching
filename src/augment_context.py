@@ -62,7 +62,7 @@ def main(args):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Augment dataset with AI-generated context")
     parser.add_argument("--input_file", type=str, required=True, help="Path to the input JSON file")
-    parser.add_argument("--output_file", type=str, required=True, help="Path to save the augmented JSON file")
+    parser.add_argument("--output_file", type=str, default='augmented_annotations.json', help="Path to save the augmented JSON file")
     parser.add_argument("--base_image_path", type=str, required=True, help="Base path to the image directory")
     parser.add_argument("--model_name", type=str, default="Salesforce/instructblip-flan-t5-xl", help="Name of the InstructBlip model to use")
     
