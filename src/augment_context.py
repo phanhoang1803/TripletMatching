@@ -25,9 +25,12 @@ def generate_context(model, processor, image_path, captions, device):
     # Load the image
     image = Image.open(image_path).convert("RGB")
     
-    # Format the captions with numbering
-    formatted_captions = "\n".join([f"{i+1}. {caption}" for i, caption in enumerate(captions)])
+    # Remove duplicate captions
+    unique_captions = list(dict.fromkeys(captions))
     
+    # Format the unique captions with numbering
+    formatted_captions = "\n".join([f"{i+1}. {caption}" for i, caption in enumerate(unique_captions)])
+
     # Construct the query for image analysis
     query = f"""Analyze the provided image in relation to the following captions:
 
