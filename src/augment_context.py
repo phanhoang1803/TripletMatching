@@ -40,8 +40,7 @@ Here are the captions: """ + " ".join(captions)
     inputs = processor(text=prompt, images=image, return_tensors="pt").to(device)
 
     # Generate context
-    with torch.no_grad():
-        output = model.generate(**inputs, max_new_tokens=200, do_sample=True, temperature=0.7, top_p=0.9)
+    output = model.generate(**inputs, max_new_tokens=200, do_sample=True, temperature=0.7)
     
     # Decode and return the generated context
     return processor.decode(output, skip_special_tokens=True)
