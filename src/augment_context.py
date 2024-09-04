@@ -27,16 +27,16 @@ def generate_context(model, processor, image_path, captions, device):
     
     # Create the query
     numbered_captions = "\n".join([f"{i+1}. {caption}" for i, caption in enumerate(captions)])
-    query = f"""I'm going to show you an image and provide some captions. Please generate a comprehensive context (4-5 sentences) that:
-1. Describes the key elements of the image.
-2. Summarizes the main points from the captions.
-3. Highlights any potential discrepancies or alignments between the image and captions.
-4. Provides relevant background information that could help verify the authenticity of the image-caption pair.
+    query = f"""IAnalyze the provided image in the context of the following captions:
 
-Here are the captions:
 {numbered_captions}
-    
-Now, based on the image and these captions, please provide the context:"""
+
+Generate a concise context (4-5 sentences) that:
+1. Describes the key elements of the image relevant to the captions.
+2. Highlights any alignments or discrepancies between the image content and the captions.
+3. Provides relevant background information that could help verify the authenticity of the image-caption pair.
+
+Focus on the image content and its relationship to the captions, without directly restating or summarizing the captions themselves."""
 
     # Create the conversation template
     conversation = [
