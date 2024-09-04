@@ -75,11 +75,11 @@ Context:"""
 
     # Generate context
     with torch.no_grad():
-        output = model.generate(**inputs, max_new_tokens=200, do_sample=True, temperature=0.7)
+        output = model.generate(**inputs, max_new_tokens=200, do_sample=True, temperature=0.8)
     
     # Decode and return the generated context
     generated_text = processor.decode(output[0], skip_special_tokens=True)
-    print("Generated text: ", generated_text)
+    # print("Generated text: ", generated_text)
     
     # Remove the input prompt from the generated text
     context = generated_text.split("[/INST]")[1].strip()
