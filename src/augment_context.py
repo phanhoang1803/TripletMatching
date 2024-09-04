@@ -43,7 +43,7 @@ Given the the image and the captions associated with it, you need to write a det
 3. Estimates the time period and possible geographic location, if possible.
 4. Identifies any significant themes or messages conveyed by the image, integrating any insights from the captions, if possible.
 
-You have to write the context in a single paragraph of 7 - 10 sentences. Be specific and confident in your description and inferences. Do not mention limitations in identifying specific individuals or places.
+You have to write the context in a single paragraph of 10 - 15 sentences. Be specific and confident in your description and inferences. Do not mention limitations in identifying specific individuals or places.
 
 Context:"""
 
