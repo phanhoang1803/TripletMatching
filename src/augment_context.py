@@ -17,7 +17,7 @@ def setup_model(model_name, use_quantized=True, use_flash_attention=True):
         quantization_config=BitsAndBytesConfig(load_in_4bit=use_quantized),
         torch_dtype=torch.float16, 
         low_cpu_mem_usage=True,
-        attn_implementation="flash_attention_2" if use_flash_attention else "flash_attention"
+        attn_implementation="flash_attention_2" if use_flash_attention else "eager"
     )
     return model, processor
 
@@ -41,7 +41,9 @@ def generate_context(model, processor, image_path, captions, device):
     inputs = processor(images=image, text=prompt, return_tensors="pt").to(device)
 
     # Generate context
-    output = model.generate(**inputs, max_new_tokens=200)
+    output = model.generate(**inputs, max_new_tokens=200, temperature=0.7)
+    
+    print("Output: ", output)
     
     # Decode and return the generated context
     return processor.decode(output[0], skip_special_tokens=True)
