@@ -32,7 +32,7 @@ def generate_context(model, processor, image_path, captions, device):
     formatted_captions = "\n".join([f"{i+1}. {caption}" for i, caption in enumerate(unique_captions)])
 
     # Construct the query for image analysis
-    query = f"""Analyze the provided image and captions to generate a single paragraph (5-7 sentences) that:
+    query = f"""Analyze the provided image and captions to generate a single paragraph (7 - 10 sentences) that:
 
 1. Describes the key visual elements and content of the image.
 2. Uses the captions to infer the most likely context, setting, or event depicted. Incorporate relevant details from the captions to enhance the description.
