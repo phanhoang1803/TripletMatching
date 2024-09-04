@@ -28,10 +28,26 @@ def generate_context(model, processor, image_path, captions, device):
     # Prepare the conversation and prompt
     conversation = [
         {
+            "role": "system",
+            "content": "You are an AI assistant specializing in analyzing images and text for fact-checking purposes. Your task is to generate contextual information that will help determine if an image-caption pair is genuine or manipulated."
+        },
+        {
             "role": "user",
             "content": [
-                {"type": "text", "text": "Generate a brief context (4-5 sentences) for this image based on the following captions: " + " ".join(captions)},
-                {"type": "image"},
+                {
+                    "type": "text", 
+                 "text": """I'm going to show you an image and provide some captions. Please generate a comprehensive context (4-5 sentences) that:
+1. Describes the key elements of the image.
+2. Summarizes the main points from the captions.
+3. Highlights any potential discrepancies or alignments between the image and captions.
+4. Provides relevant background information that could help verify the authenticity of the image-caption pair.
+
+Here are the captions: """ + " ".join(captions)
+                },
+                
+                {
+                    "type": "image"
+                },
             ],
         },
     ]
@@ -41,7 +57,7 @@ def generate_context(model, processor, image_path, captions, device):
     inputs = processor(images=image, text=prompt, return_tensors="pt").to(device)
 
     # Generate context
-    output = model.generate(**inputs, max_new_tokens=200, do_sample=True, temperature=0.7)
+    output = model.generate(**inputs, max_new_tokens=200, do_sample=True, temperature=0.7, top_p=0.9)
     
     # Decode and return the generated context
     return processor.decode(output[0], skip_special_tokens=True)
