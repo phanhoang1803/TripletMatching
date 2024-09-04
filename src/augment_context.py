@@ -10,14 +10,14 @@ def load_data(file_path):
     with open(file_path, 'r') as file:
         return json.load(file)
 
-def setup_model(model_name):
+def setup_model(model_name, use_quantized=True, use_flash_attention=True):
     processor = LlavaNextProcessor.from_pretrained(model_name)
     model = LlavaNextForConditionalGeneration.from_pretrained(
         model_name, 
         torch_dtype=torch.float16, 
         low_cpu_mem_usage=True,
-        load_in_4bit=True,
-        use_flash_attention_2=True
+        load_in_4bit=use_quantized,
+        use_flash_attention_2=use_flash_attention
     )
     return model, processor
 
@@ -66,7 +66,7 @@ def main(args):
     
     print("Setting up the model...")
     device = "cuda" if torch.cuda.is_available() else "cpu"
-    model, processor = setup_model(args.model_name)
+    model, processor = setup_model(args.model_name, args.use_quantized, args.use_flash_attention)
     model.to(device)
     
     print("Augmenting data with AI-generated context...")
@@ -83,6 +83,8 @@ if __name__ == "__main__":
     parser.add_argument("--output_file", type=str, default='augmented_annotations.json', help="Path to save the augmented JSON file")
     parser.add_argument("--base_image_path", type=str, required=True, help="Base path to the image directory")
     parser.add_argument("--model_name", type=str, default="llava-hf/llava-v1.6-mistral-7b-hf", help="Name of the LLaVA model to use")
+    parser.add_argument("--use_quantized", action='store_true', help="Use quantized model")
+    parser.add_argument("--use_flash_attention", action='store_true', help="Use flash attention")
     
     args = parser.parse_args()
     main(args)
