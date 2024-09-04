@@ -32,19 +32,22 @@ def generate_context(model, processor, image_path, captions, device):
     formatted_captions = "\n".join([f"{i+1}. {caption}" for i, caption in enumerate(unique_captions)])
 
     # Construct the query for image analysis
-    query = f"""Analyze the provided image:
+    query = f"""Analyze the provided image in detail:
 
-1. Describe the key visual elements and content of the image in detail.
-2. Infer the potential source, context, or origin of the image based solely on its content.
-3. Provide any relevant historical, cultural, or factual context that directly relates to what's seen in the image.
+    1. Describe all visual elements you can observe, including people, objects, settings, actions, and any notable features. Be specific and comprehensive.
+    2. Based on these visual elements, infer the most likely context, setting, or event depicted. Consider factors like clothing, environment, actions, and any visible text or symbols.
+    3. Estimate the time period and possible geographic location based on visual cues.
+    4. Identify any significant themes, emotions, or messages conveyed by the image.
 
-After analyzing the image, briefly comment on how the following captions relate to the image content:
+    Do not use phrases like "the image does not provide textual information" or "I cannot definitively identify". Instead, describe what you see and make reasonable inferences based on visual evidence. If you're uncertain, provide your best estimate and explain your reasoning.
 
-{formatted_captions}
+    After your image analysis, briefly evaluate how the following captions relate to what you've observed:
 
-Generate a concise context (4-5 sentences) that accurately describes the image content and its implications, using only verifiable information from the image itself.
+    {formatted_captions}
 
-Context:"""
+    Synthesize your observations into a concise context (4-5 sentences) that accurately describes the image content and its implications.
+
+    Context:"""
 
     # Define the conversation template for the AI model
     conversation = [
@@ -53,7 +56,7 @@ Context:"""
         "content": [
             {
                 "type": "text",
-                "text": "You are an AI assistant specialized in objective image analysis. Your primary task is to describe and contextualize images based solely on their visual content. Any provided captions or text should be treated as secondary information and critically evaluated against the image content. Provide accurate, evidence-based analyses without making unfounded assumptions. If there's uncertainty, clearly state it."
+                "text": "You are an expert in visual analysis and interpretation. Your task is to provide detailed, insightful descriptions and inferences based on image content. Avoid non-committal statements. Instead, offer your best analysis based on visual evidence, clearly distinguishing between direct observations and reasoned inferences. Be specific, descriptive, and confident in your analysis while maintaining accuracy."
             }
         ]
     },
