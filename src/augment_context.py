@@ -34,6 +34,8 @@ def generate_context(model, processor, image_path, captions, device):
 def augment_data(data, model, processor, base_image_path, device):
     for item in tqdm(data, desc="Generating context"):
         image_path = os.path.join(base_image_path, item['img_local_path'])
+        if not os.path.exists(image_path):
+            continue
         captions = [article['caption'] for article in item['articles']]
         item['context'] = generate_context(model, processor, image_path, captions, device)
     return data
