@@ -17,7 +17,7 @@ def setup_model(model_name, use_quantized=True, use_flash_attention=True):
         quantization_config=BitsAndBytesConfig(load_in_4bit=use_quantized),
         torch_dtype=torch.float16, 
         low_cpu_mem_usage=True,
-        use_flash_attention_2=use_flash_attention
+        attn_implementation="flash_attention_2" if use_flash_attention else "flash_attention"
     )
     return model, processor
 
