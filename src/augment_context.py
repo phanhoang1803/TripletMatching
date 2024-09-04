@@ -43,8 +43,6 @@ def generate_context(model, processor, image_path, captions, device):
     # Generate context
     output = model.generate(**inputs, max_new_tokens=200, temperature=0.7)
     
-    print("Output: ", output)
-    
     # Decode and return the generated context
     return processor.decode(output[0], skip_special_tokens=True)
 
@@ -54,7 +52,7 @@ def augment_data(data, model, processor, base_image_path, device):
         if not os.path.exists(image_path):
             continue
         captions = [article['caption'] for article in item['articles']]
-        item['context'] = generate_context(model, processor, image_path, captions, device)
+        item['context'] = generate_context(model, processor, image_path, captions, device).split("[/INST]")[1].strip()
         print("Context: ", item['context'])
     return data
 
