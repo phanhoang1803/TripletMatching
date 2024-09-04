@@ -15,7 +15,7 @@ def setup_model(model_name, use_quantized=True, use_flash_attention=True):
     model = LlavaNextForConditionalGeneration.from_pretrained(
         model_name, 
         quantization_config=BitsAndBytesConfig(load_in_4bit=use_quantized),
-        torch_dtype=torch.float16, 
+        torch_dtype=torch.float32 if use_quantized else torch.float16, 
         low_cpu_mem_usage=True,
         attn_implementation="flash_attention_2" if use_flash_attention else "eager"
     )
@@ -35,6 +35,8 @@ I'm going to show you an image and provide some captions. Please generate a comp
 4. Provides relevant background information that could help verify the authenticity of the image-caption pair.
 
 Here are the captions: """ + " ".join(captions)
+
+    print("Prompt: ", prompt)
 
     # Process inputs
     inputs = processor(text=prompt, images=image, return_tensors="pt").to(device)
