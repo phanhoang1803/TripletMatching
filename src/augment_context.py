@@ -32,17 +32,18 @@ def generate_context(model, processor, image_path, captions, device):
     formatted_captions = "\n".join([f"{i+1}. {caption}" for i, caption in enumerate(unique_captions)])
 
     # Construct the query for image analysis
-    query = f"""Analyze the provided image and captions to generate a single paragraph (7 - 10 sentences) that:
+    query = f"""
+Captions:
+{formatted_captions}
+
+Given the the image and the captions associated with it, you need to write a detailed context paragraph based on the image and the captions. There are 4 key points you need to cover to generate the context:
 
 1. Describes the key visual elements and content of the image.
 2. Uses the captions to infer the most likely context, setting, or event depicted. Incorporate relevant details from the captions to enhance the description.
 3. Estimates the time period and possible geographic location, if possible.
 4. Identifies any significant themes or messages conveyed by the image, integrating any insights from the captions.
 
-Captions:
-{formatted_captions}
-
-Provide this context based solely on what you observe in the image and the captions. Be specific and confident in your description and inferences. Do not mention limitations in identifying specific individuals or places, if can't identify, just skip.
+You need to write only one detailed paragraph of 7 - 10 sentences based on above points. Be specific and confident in your description and inferences. Do not mention limitations in identifying specific individuals or places.
 
 Context:"""
 
@@ -60,7 +61,7 @@ Context:"""
     {
         "role": "user",
         "content": [
-                {"type": "image", "image": image},
+                {"type": "image"},
                 {"type": "text", "text": query} 
             ]
         }
