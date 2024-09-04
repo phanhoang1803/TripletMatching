@@ -41,7 +41,7 @@ def generate_context(model, processor, image_path, captions, device):
     inputs = processor(images=image, text=prompt, return_tensors="pt").to(device)
 
     # Generate context
-    output = model.generate(**inputs, max_new_tokens=100)
+    output = model.generate(**inputs, max_new_tokens=200)
     
     # Decode and return the generated context
     return processor.decode(output[0], skip_special_tokens=True)
