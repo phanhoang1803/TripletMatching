@@ -2,26 +2,41 @@ import argparse
 import json
 import torch
 from PIL import Image
-from transformers import InstructBlipProcessor, InstructBlipForConditionalGeneration
 from tqdm import tqdm
 import os
+from transformers import LlavaNextProcessor, LlavaNextForConditionalGeneration
 
 def load_data(file_path):
     with open(file_path, 'r') as file:
         return json.load(file)
 
 def setup_model(model_name):
-    processor = InstructBlipProcessor.from_pretrained(model_name)
-    model = InstructBlipForConditionalGeneration.from_pretrained(model_name)
+    processor = LlavaNextProcessor.from_pretrained(model_name)
+    model = LlavaNextForConditionalGeneration.from_pretrained(
+        model_name, 
+        torch_dtype=torch.float16, 
+        low_cpu_mem_usage=True,
+        load_in_4bit=True,
+        use_flash_attention_2=True
+    )
     return model, processor
 
 def generate_context(model, processor, image_path, captions, device):
     # Load the image
     image = Image.open(image_path).convert("RGB")
     
-    # Prepare the prompt
-    prompt = "Generate a brief context (4-5 sentences) for this image based on the following captions: " + " ".join(captions)
-    
+    # Prepare the conversation and prompt
+    conversation = [
+        {
+            "role": "user",
+            "content": [
+                {"type": "text", "text": "Generate a brief context (4-5 sentences) for this image based on the following captions: " + " ".join(captions)},
+                {"type": "image"},
+            ],
+        },
+    ]
+    prompt = processor.apply_chat_template(conversation, add_generation_prompt=True)
+
     # Process inputs
     inputs = processor(images=image, text=prompt, return_tensors="pt").to(device)
 
@@ -66,7 +81,7 @@ if __name__ == "__main__":
     parser.add_argument("--input_file", type=str, required=True, help="Path to the input JSON file")
     parser.add_argument("--output_file", type=str, default='augmented_annotations.json', help="Path to save the augmented JSON file")
     parser.add_argument("--base_image_path", type=str, required=True, help="Base path to the image directory")
-    parser.add_argument("--model_name", type=str, default="Salesforce/instructblip-flan-t5-xl", help="Name of the InstructBlip model to use")
+    parser.add_argument("--model_name", type=str, default="llava-hf/llava-v1.6-mistral-7b-hf", help="Name of the LLaVA model to use")
     
     args = parser.parse_args()
     main(args)
