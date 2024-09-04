@@ -32,22 +32,19 @@ def generate_context(model, processor, image_path, captions, device):
     formatted_captions = "\n".join([f"{i+1}. {caption}" for i, caption in enumerate(unique_captions)])
 
     # Construct the query for image analysis
-    query = f"""Analyze the provided image in detail:
+    query = f"""Analyze the provided image and captions to generate a single paragraph (5-7 sentences) that:
 
-    1. Describe all visual elements you can observe, including people, objects, settings, actions, and any notable features. Be specific and comprehensive.
-    2. Based on these visual elements, infer the most likely context, setting, or event depicted. Consider factors like clothing, environment, actions, and any visible text or symbols.
-    3. Estimate the time period and possible geographic location based on visual cues.
-    4. Identify any significant themes, emotions, or messages conveyed by the image.
+1. Describes the key visual elements and content of the image.
+2. Uses the captions to infer the most likely context, setting, or event depicted. Incorporate relevant details from the captions to enhance the description.
+3. Estimates the time period and possible geographic location, if possible.
+4. Identifies any significant themes or messages conveyed by the image, integrating any insights from the captions.
 
-    Do not use phrases like "the image does not provide textual information" or "I cannot definitively identify". Instead, describe what you see and make reasonable inferences based on visual evidence. If you're uncertain, provide your best estimate and explain your reasoning.
+Captions:
+{formatted_captions}
 
-    After your image analysis, briefly evaluate how the following captions relate to what you've observed:
+Provide this context based solely on what you observe in the image and the captions. Be specific and confident in your description and inferences. Do not mention limitations in identifying specific individuals or places, if can't identify, just skip.
 
-    {formatted_captions}
-
-    Synthesize your observations into a concise context (4-5 sentences) that accurately describes the image content and its implications.
-
-    Context:"""
+Context:"""
 
     # Define the conversation template for the AI model
     conversation = [
@@ -56,7 +53,7 @@ def generate_context(model, processor, image_path, captions, device):
         "content": [
             {
                 "type": "text",
-                "text": "You are an expert in visual analysis and interpretation. Your task is to provide detailed, insightful descriptions and inferences based on image content. Avoid non-committal statements. Instead, offer your best analysis based on visual evidence, clearly distinguishing between direct observations and reasoned inferences. Be specific, descriptive, and confident in your analysis while maintaining accuracy."
+                "text": "You are an AI trained in detailed image and caption analysis. Use both visual cues from the image and information from the captions to generate a coherent and informative context paragraph. Integrate details from the captions seamlessly into your analysis."
             }
         ]
     },
