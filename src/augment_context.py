@@ -25,23 +25,36 @@ def generate_context(model, processor, image_path, captions, device):
     # Load the image
     image = Image.open(image_path).convert("RGB")
     
-    # Create the query
-    numbered_captions = "\n".join([f"{i+1}. {caption}" for i, caption in enumerate(captions)])
-    query = f"""IAnalyze the provided image in the context of the following captions:
+    # Format the captions with numbering
+    formatted_captions = "\n".join([f"{i+1}. {caption}" for i, caption in enumerate(captions)])
+    
+    # Construct the query for image analysis
+    query = f"""Analyze the provided image in relation to the following captions:
 
-{numbered_captions}
+{formatted_captions}
 
-Generate a concise context (4-5 sentences) that:
-1. Describes the key elements of the image relevant to the captions.
-2. Highlights any alignments or discrepancies between the image content and the captions.
-3. Provides relevant background information that could help verify the authenticity of the image-caption pair.
+Generate a concise context (4-5 sentences) that describes the image content, infers its source information, and highlights any relevant information that connects the image to the captions.
 
-Focus on the image content and its relationship to the captions, without directly restating or summarizing the captions themselves."""
+Context:"""
 
-    # Create the conversation template
+    # Define the conversation template for the AI model
     conversation = [
-        {"role": "assistant", "content": [{"type": "text", "text": "You are an AI assistant specializing in analyzing images and text for fact-checking purposes. Your task is to generate contextual information that will help determine if an image-caption pair is genuine or manipulated."}]},
-        {"role": "user", "content": [{"type": "text", "text": query}, {"type": "image", "image": image}]}
+        {
+            "role": "assistant", 
+            "content": [
+                {
+                    "type": "text", 
+                    "text": "You are an AI assistant skilled in analyzing images and text for fact-checking. Your task is to create a context that helps verify the source and relevance of the image based on the provided captions and your knowledge."
+                }
+            ]
+        },
+        {
+            "role": "user", 
+            "content": [
+                {"type": "text", "text": query}, 
+                {"type": "image", "image": image}
+            ]
+        }
     ]
     
     # Apply the chat template
@@ -56,7 +69,8 @@ Focus on the image content and its relationship to the captions, without directl
     
     # Decode and return the generated context
     generated_text = processor.decode(output[0], skip_special_tokens=True)
-
+    print("Generated text: ", generated_text)
+    
     # Remove the input prompt from the generated text
     context = generated_text[len(prompt):].strip()
     
