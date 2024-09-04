@@ -32,34 +32,36 @@ def generate_context(model, processor, image_path, captions, device):
     formatted_captions = "\n".join([f"{i+1}. {caption}" for i, caption in enumerate(unique_captions)])
 
     # Construct the query for image analysis
-    query = f"""Analyze the image in relation to these captions (which may be real or fake news):
+    query = f"""Analyze the provided image:
+
+1. Describe the key visual elements and content of the image in detail.
+2. Infer the potential source, context, or origin of the image based solely on its content.
+3. Provide any relevant historical, cultural, or factual context that directly relates to what's seen in the image.
+
+After analyzing the image, briefly comment on how the following captions relate to the image content:
 
 {formatted_captions}
 
-Provide a concise context (4-5 sentences) that:
-1. Describes the key visual elements in the image
-2. Infers potential source or origin of the image
-3. Evaluates the relevance of the captions to the image content
-4. Highlights any discrepancies or red flags for misinformation
+Generate a concise context (4-5 sentences) that accurately describes the image content and its implications, using only verifiable information from the image itself.
 
 Context:"""
 
     # Define the conversation template for the AI model
     conversation = [
-        {
-            "role": "assistant", 
-            "content": [
-                {
-                    "type": "text", 
-                    "text": "You are an AI assistant specialized in image analysis and fact-checking. Your task is to critically examine images and associated text to verify authenticity and relevance. Provide objective, evidence-based analyses without making unfounded assumptions."
-                }
-            ]
-        },
-        {
-            "role": "user", 
-            "content": [
-                {"type": "text", "text": query}, 
-                {"type": "image", "image": image}
+    {
+        "role": "system",
+        "content": [
+            {
+                "type": "text",
+                "text": "You are an AI assistant specialized in objective image analysis. Your primary task is to describe and contextualize images based solely on their visual content. Any provided captions or text should be treated as secondary information and critically evaluated against the image content. Provide accurate, evidence-based analyses without making unfounded assumptions. If there's uncertainty, clearly state it."
+            }
+        ]
+    },
+    {
+        "role": "user",
+        "content": [
+                {"type": "image", "image": image},
+                {"type": "text", "text": query} 
             ]
         }
     ]
