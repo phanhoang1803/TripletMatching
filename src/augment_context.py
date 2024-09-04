@@ -44,7 +44,7 @@ Here are the captions: """ + " ".join(captions)
         output = model.generate(**inputs, max_new_tokens=200, do_sample=True, temperature=0.7, top_p=0.9)
     
     # Decode and return the generated context
-    return processor.batch_decode(output, skip_special_tokens=True)[0]
+    return processor.decode(output, skip_special_tokens=True)
 
 def augment_data(data, model, processor, base_image_path, device):
     for item in tqdm(data, desc="Generating context"):
