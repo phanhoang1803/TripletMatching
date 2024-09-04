@@ -4,7 +4,7 @@ import torch
 from PIL import Image
 from tqdm import tqdm
 import os
-from transformers import LlavaNextProcessor, LlavaNextForConditionalGeneration
+from transformers import LlavaNextProcessor, LlavaNextForConditionalGeneration, BitsAndBytesConfig
 
 def load_data(file_path):
     with open(file_path, 'r') as file:
@@ -14,9 +14,9 @@ def setup_model(model_name, use_quantized=True, use_flash_attention=True):
     processor = LlavaNextProcessor.from_pretrained(model_name)
     model = LlavaNextForConditionalGeneration.from_pretrained(
         model_name, 
+        quantization_config=BitsAndBytesConfig(load_in_4bit=use_quantized),
         torch_dtype=torch.float16, 
         low_cpu_mem_usage=True,
-        load_in_4bit=use_quantized,
         use_flash_attention_2=use_flash_attention
     )
     return model, processor
