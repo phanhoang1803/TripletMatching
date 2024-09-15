@@ -1,0 +1,44 @@
+model:
+  contrastive:
+    input_dim: 1024
+    ff_hidden_dim: 1024
+    output_dim: 256
+    attn_feature_dim: 64
+    temperature: 0.7
+
+  image:
+    model_name: 'resnet50'
+    pretrained: true
+    input_dim: 64
+    embed_dim: 64
+  
+  context:
+    tokenizer: 'bert-base-uncased'
+    encoder: 'simple'
+    input_dim: 64
+    vocab_size: 10000  # Adjust based on your vocabulary
+    embed_dim: 128
+
+  caption:
+    tokenizer: 'bert-base-uncased'
+    encoder: 'simple'
+    input_dim: 64
+    vocab_size: 10000  # Adjust based on your vocabulary
+    embed_dim: 128
+
+data:
+  dataset_name: 'RealTimeData/bbc_news_alltime'
+  dataset_version: '2020-02'
+  data_dir: 'data'
+  train_split: 0.8
+  val_split: 0.2
+
+train:
+  batch_size: 2
+  num_epochs: 10
+  learning_rate: 0.001
+  weight_decay: 0.0001
+  momentum: 0.9
+  num_workers: 4
+
+debug: true
