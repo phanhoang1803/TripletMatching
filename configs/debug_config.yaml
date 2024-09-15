@@ -41,4 +41,4 @@ train:
   momentum: 0.9
   num_workers: 4
 
-debug: false
+debug: true
