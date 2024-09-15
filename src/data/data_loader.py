@@ -54,6 +54,8 @@ def get_data_loaders_bbc(config):
     
     if config.debug == True:
         data = data['train'].select([i for i in range(200)])
+    else:
+        data = data['train']
     
     dataset = BBCNewsDataset(data, transform=transform, context_tokenizer=context_tokenizer, caption_tokenizer=caption_tokenizer, max_length=512)
 
