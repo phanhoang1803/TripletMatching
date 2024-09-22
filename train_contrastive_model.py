@@ -1,8 +1,9 @@
+import numpy as np
 from omegaconf import OmegaConf
 import torch
 import yaml
 from src.models.contrastive_model import ContrastiveLearningModel
-from src.data.data_loader import get_data_loaders, get_data_loaders_bbc
+from src.data.data_loader import get_data_loaders, get_bbc_data_loaders
 from src.utils.metrics import contrastive_loss, accuracy
 import argparse
 from tqdm import tqdm
@@ -25,13 +26,22 @@ def train_epoch(model, dataloader, optimizer, device):
     total_loss = 0
     total_acc = 0
     
-    # Print the first batch
     for batch in tqdm(dataloader, desc="Training"):
         images, contexts, captions, labels = [item.to(device) for item in batch]
         
+        # Check for NaN values in the input data
+        if np.isnan(images.cpu().numpy()).any() or np.isnan(contexts.cpu().numpy()).any() or np.isnan(captions.cpu().numpy()).any():
+            print("NaN detected in input data!")
+            continue  # Skip this batch if NaN is found
+        
         optimizer.zero_grad()
-        sim_img_ctx, sim_img_cap, sim_ctx_cap = model(images, contexts, captions)
-        loss = model.compute_loss(sim_img_ctx, sim_img_cap, sim_ctx_cap)
+        sim_img_ctx, sim_ctx_img, sim_img_cap, sim_cap_img, sim_ctx_cap, sim_cap_ctx = model(images, contexts, captions)
+        loss = model.compute_loss(sim_img_ctx, sim_ctx_img, sim_img_cap, sim_cap_img, sim_ctx_cap, sim_cap_ctx)
+
+        # Check for NaN in loss
+        if np.isnan(loss.item()):
+            print("NaN detected in loss!")
+            continue  # Skip this batch if NaN is found
 
         loss.backward()
         optimizer.step()
@@ -50,8 +60,8 @@ def validate(model, dataloader, device):
     with torch.no_grad():
         for batch in tqdm(dataloader, desc="Validating"):
             images, contexts, captions, labels = [item.to(device) for item in batch]
-            sim_img_ctx, sim_img_cap, sim_ctx_cap = model(images, contexts, captions)
-            loss = model.compute_loss(sim_img_ctx, sim_img_cap, sim_ctx_cap)
+            sim_img_ctx, sim_ctx_img, sim_img_cap, sim_cap_img, sim_ctx_cap, sim_cap_ctx = model(images, contexts, captions)
+            loss = model.compute_loss(sim_img_ctx, sim_ctx_img, sim_img_cap, sim_cap_img, sim_ctx_cap, sim_cap_ctx)
             # acc = accuracy(outputs, labels)
             
             total_loss += loss.item()
@@ -67,7 +77,7 @@ def main():
     
     # Load the data loaders
     if config.data.dataset_name == 'RealTimeData/bbc_news_alltime':
-        train_loader, val_loader = get_data_loaders_bbc(config)
+        train_loader, val_loader = get_bbc_data_loaders(config)
     else:
         train_loader, val_loader = get_data_loaders(config)
     

@@ -1,35 +1,23 @@
+import json
 import os
 import torch
 from torch.utils.data import DataLoader
 from torchvision import transforms
-from .dataset import TripletMatchingDataset, BBCNewsDataset
+from .dataset import AugmentedContextDataset, TripletMatchingDataset, BBCNewsDataset
 import datasets
 from transformers import AutoTokenizer
-from .dataset import collate_fn
+from transformers import RobertaTokenizer, RobertaTokenizerFast
+from ..utils.utils import collate_fn
 
 def get_data_loaders(config):
-    transform = transforms.Compose([
-        transforms.Resize((224, 224)),
-        transforms.ToTensor(),
-        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
-    ])
-
-    full_train_dataset = TripletMatchingDataset(os.path.join(config.data.data_dir, 'train'), transform=transform)
+    if config.data.dataset_name == 'RealTimeData/bbc_news_alltime':
+        return get_bbc_data_loaders(config)
+    elif config.data.dataset_name == 'augmented_context':
+        return get_augmented_context_data_loaders(config)
+    else:
+        raise ValueError(f"Dataset {config.data.dataset_name} not found")
     
-    # Split the train dataset into train and validation
-    train_size = int(0.8 * len(full_train_dataset))
-    val_size = len(full_train_dataset) - train_size
-    train_dataset, val_dataset = torch.utils.data.random_split(full_train_dataset, [train_size, val_size])
-    
-    test_dataset = TripletMatchingDataset(os.path.join(config.data.data_dir, 'test'), transform=transform)
-
-    train_loader = DataLoader(train_dataset, batch_size=config.train.batch_size, shuffle=True, num_workers=config.train.num_workers)
-    val_loader = DataLoader(val_dataset, batch_size=config.train.batch_size, shuffle=False, num_workers=config.train.num_workers)
-    test_loader = DataLoader(test_dataset, batch_size=config.train.batch_size, shuffle=False, num_workers=config.train.num_workers)
-
-    return train_loader, val_loader, test_loader
-
-def get_data_loaders_bbc(config):
+def get_bbc_data_loaders(config):
     """
     Get the data loaders for the BBC News dataset.
     
@@ -47,20 +35,19 @@ def get_data_loaders_bbc(config):
         transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
     ])
 
-    context_tokenizer = AutoTokenizer.from_pretrained('bert-base-uncased')
-    caption_tokenizer = AutoTokenizer.from_pretrained('bert-base-uncased')
+    context_tokenizer = get_context_tokenizer(config)
+    caption_tokenizer = get_caption_tokenizer(config)
 
     data = datasets.load_dataset('RealTimeData/bbc_news_alltime', '2020-02')
     
     if config.debug == True:
-        data = data['train'].select([i for i in range(200)])
+        data = data['train'].select([i for i in range(config.data.num_debug_samples)])
     else:
         data = data['train']
     
     dataset = BBCNewsDataset(data, transform=transform, context_tokenizer=context_tokenizer, caption_tokenizer=caption_tokenizer, max_length=512)
 
-
-    train_size = int(0.8 * len(dataset))
+    train_size = int(config.data.train_split * len(dataset))
     val_size = len(dataset) - train_size
     train_dataset, val_dataset = torch.utils.data.random_split(dataset, [train_size, val_size])
 
@@ -71,4 +58,50 @@ def get_data_loaders_bbc(config):
     config.model.caption.vocab_size = len(caption_tokenizer)
     
     return train_loader, val_loader
+
+def get_augmented_context_data_loaders(config):
+    with open(config.data.json_path, 'r') as f:
+        data = json.load(f)
+    
+    transform = transforms.Compose([
+
+        transforms.Resize((224, 224)),
+        transforms.ToTensor(),
+        transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])
+    ])
+    
+    context_tokenizer = get_context_tokenizer(config)
+    caption_tokenizer = get_caption_tokenizer(config)
+
+    if config.debug == True:
+        data = data[:config.data.num_debug_samples]
+    
+    train_dataset = AugmentedContextDataset(data=data, transform=transform, 
+                                            context_tokenizer=context_tokenizer, 
+                                            caption_tokenizer=caption_tokenizer)
+    
+    train_size = int(config.data.train_split * len(train_dataset))
+    val_size = len(train_dataset) - train_size
+    train_dataset, val_dataset = torch.utils.data.random_split(train_dataset, [train_size, val_size])
+
+    train_loader = DataLoader(train_dataset, batch_size=config.train.batch_size, shuffle=True, num_workers=config.train.num_workers, collate_fn=collate_fn, prefetch_factor=config.train.prefetch_factor)
+    val_loader = DataLoader(val_dataset, batch_size=config.train.batch_size, shuffle=False, num_workers=config.train.num_workers, collate_fn=collate_fn, prefetch_factor=config.train.prefetch_factor)
+    
+    return train_loader, val_loader
+    
+def get_caption_tokenizer(config):
+    if config.model.caption.tokenizer == 'roberta_tokenizer':
+        return RobertaTokenizer.from_pretrained('roberta-base')
+    elif config.model.caption.tokenizer == 'roberta_tokenizer_fast':
+        return RobertaTokenizerFast.from_pretrained('roberta-base')
+    else:
+        raise ValueError(f"Tokenizer {config.model.caption.tokenizer} not found")
+
+def get_context_tokenizer(config):
+    if config.model.context.tokenizer == 'roberta_tokenizer':
+        return RobertaTokenizer.from_pretrained('roberta-base')
+    elif config.model.context.tokenizer == 'roberta_tokenizer_fast':
+        return RobertaTokenizerFast.from_pretrained('roberta-base')
+    else:
+        raise ValueError(f"Tokenizer {config.model.context.tokenizer} not found")
 

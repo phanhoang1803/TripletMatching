@@ -61,10 +61,14 @@ class BBCNewsDataset(Dataset):
         self.max_length = max_length
 
     def __getitem__(self, idx):
-        item = self.data[idx]
-        image_url = item['top_image']
-        caption = item['title']
-        context = item['description']
+        item = self.data[idx]  # Ensure self.data is a list of dictionaries
+        # Check if item is a dictionary
+        if isinstance(item, dict):
+            image_url = item['top_image']
+            caption = item['title']
+            context = item['description']
+        else:
+            raise ValueError("Expected item to be a dictionary.")
 
         parsed_url = urlparse(image_url)
         filename = os.path.basename(parsed_url.path)
@@ -106,14 +110,41 @@ class BBCNewsDataset(Dataset):
     def __len__(self):
         return len(self.data)
 
-def collate_fn(batch):
-    images, captions, contexts, labels = zip(*batch)
+class AugmentedContextDataset(Dataset):
+    def __init__(self, data, transform=None, context_tokenizer=None, caption_tokenizer=None, max_length=512):
+        self.data = data
+
+        self.transform = transform
+        self.context_tokenizer = context_tokenizer
+        self.caption_tokenizer = caption_tokenizer
+        self.max_length = max_length
+        
+    def __len__(self):
+        return len(self.data)
+        
+    def __getitem__(self, idx):
+        item = self.data[idx]  # Ensure self.data is a list of dictionaries
+        # Check if item is a dictionary
+        if isinstance(item, dict):
+            image_path = item['img_local_path']
+        else:
+            raise ValueError(f"Expected item {idx} to be a dictionary.")
+
+        if not os.path.exists(image_path):
     
-    images = torch.stack(images, 0)
-    labels = torch.stack(labels, 0)
-    
-    captions = pad_sequence(captions, batch_first=True, padding_value=0)
-    contexts = pad_sequence(contexts, batch_first=True, padding_value=0)
-    
-    return images, captions, contexts, labels
+            image = Image.new('RGB', (224, 224), (0, 0, 0))
+        else:
+            image = Image.open(image_path).convert('RGB')
+        
+        caption = item['caption2']
+        context = item['context2']
+        context_label = item['context_label']
+        if self.transform:
+            image = self.transform(image)
+            
+        caption_tensor = torch.tensor(self.caption_tokenizer.encode(caption, truncation=True, max_length=self.max_length))
+        context_tensor = torch.tensor(self.context_tokenizer.encode(context, truncation=True, max_length=self.max_length))
+        
+        return (image, caption_tensor, context_tensor, torch.tensor(context_label, dtype=torch.long))
+
 
