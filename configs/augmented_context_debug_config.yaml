@@ -11,14 +11,14 @@ model:
   context:
     tokenizer: 'roberta_tokenizer'
     encoder: 'roberta'
-    fine_tune: false
+    fine_tune: true
     embed_dim: 256
 
 
   caption:
     tokenizer: 'roberta_tokenizer'
     encoder: 'roberta'
-    fine_tune: false
+    fine_tune: true
     embed_dim: 256
 
 data:
@@ -30,8 +30,8 @@ data:
 
 train:
   batch_size: 32
-  num_epochs: 10
-  learning_rate: 0.001
+  num_epochs: 100
+  learning_rate: 0.01
   weight_decay: 0.0001
   momentum: 0.9
   num_workers: 4

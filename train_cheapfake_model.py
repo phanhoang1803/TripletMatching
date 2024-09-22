@@ -1,5 +1,3 @@
-# python train_cheapfake_model.py --config configs/config.yaml
-
 import numpy as np
 from omegaconf import OmegaConf
 import torch
@@ -20,6 +18,12 @@ def parse_args():
     
     return args
 
+def compute_accuracy(outputs, labels):
+    predictions = torch.argmax(outputs, dim=1)
+    correct = (predictions == labels).float()
+    accuracy = correct.sum() / len(correct)
+    return accuracy.item()
+
 def train_epoch(model, dataloader, optimizer, scheduler, device):
     model.train()
     total_loss = 0
@@ -34,11 +38,14 @@ def train_epoch(model, dataloader, optimizer, scheduler, device):
         loss.backward()
         optimizer.step()
         scheduler.step()
+        
         total_loss += loss.item()
-
+        total_acc += compute_accuracy(outputs, labels)
+        
     avg_loss = total_loss / len(dataloader)
+    avg_acc = total_acc / len(dataloader)
 
-    return avg_loss, 0
+    return avg_loss, avg_acc
 
 def validate(model, dataloader, device):
     model.eval()
@@ -50,10 +57,13 @@ def validate(model, dataloader, device):
             images, contexts, captions, labels = [item.to(device) for item in batch]
             outputs = model(images, contexts, captions)
             loss = model.compute_loss(outputs, labels)
+            
             total_loss += loss.item()
+            total_acc += compute_accuracy(outputs, labels)
 
     avg_loss = total_loss / len(dataloader)
-    return avg_loss, 0
+    avg_acc = total_acc / len(dataloader)
+    return avg_loss, avg_acc
 
 def main():
     args = parse_args()
@@ -70,6 +80,7 @@ def main():
     model = CheapFakeModel(config).to(device)
     optimizer = torch.optim.Adam(model.parameters(), lr=config.train.learning_rate)
     scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.1)
+    
     for epoch in range(config.train.num_epochs):
         train_loss, train_acc = train_epoch(model, train_loader, optimizer, scheduler, device)
         val_loss, val_acc = validate(model, val_loader, device)
@@ -78,5 +89,7 @@ def main():
         print(f"Train Loss: {train_loss:.4f}, Train Acc: {train_acc:.4f}")
         print(f"Val Loss: {val_loss:.4f}, Val Acc: {val_acc:.4f}")
 
+        torch.save(model.state_dict(), f"checkpoints/cheapfake_model_{epoch+1}_{val_loss:.4f}_{val_acc:.4f}.pth")
+        
 if __name__ == '__main__':
     main()
