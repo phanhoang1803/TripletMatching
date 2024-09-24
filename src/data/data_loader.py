@@ -60,7 +60,7 @@ def get_bbc_data_loaders(config):
     return train_loader, val_loader
 
 def get_augmented_context_data_loaders(config):
-    with open(config.data.json_path, 'r') as f:
+    with open(os.path.join(config.args.data_dir, config.data.json_file), 'r') as f:
         data = json.load(f)
     
     transform = transforms.Compose([
@@ -76,9 +76,11 @@ def get_augmented_context_data_loaders(config):
     if config.debug == True:
         data = data[:config.data.num_debug_samples]
     
-    train_dataset = AugmentedContextDataset(data=data, transform=transform, 
+    train_dataset = AugmentedContextDataset(data=data, 
+                                            transform=transform, 
                                             context_tokenizer=context_tokenizer, 
-                                            caption_tokenizer=caption_tokenizer)
+                                            caption_tokenizer=caption_tokenizer,
+                                            config=config)
     
     train_size = int(config.data.train_split * len(train_dataset))
     val_size = len(train_dataset) - train_size

@@ -13,7 +13,7 @@ def parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument('--device', default='cuda' if torch.cuda.is_available() else 'cpu', help='device')
     parser.add_argument('--config', default='configs/config.yaml', help='config file path')
-    
+    parser.add_argument('--data_dir', required=True, help='path to the data directory')
     args = parser.parse_args()
     
     return args
@@ -68,6 +68,7 @@ def validate(model, dataloader, device):
 def main():
     args = parse_args()
     config = OmegaConf.load(args.config)
+    config.args = args.__dict__
     device = 'cuda' if torch.cuda.is_available() else 'cpu'
     
     # Load the data loaders

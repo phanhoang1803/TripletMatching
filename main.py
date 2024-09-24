@@ -1,4 +1,4 @@
-from train import train
+from train_contrastive_model import train
 from evaluate import evaluate
 from config import Config
 

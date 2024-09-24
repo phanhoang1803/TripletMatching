@@ -23,7 +23,7 @@ model:
 
 data:
   dataset_name: 'augmented_context'
-  json_path: 'data/train/train_first_40k.json'
+  json_file: 'train_first_40k.json'
   num_debug_samples: 10000
   train_split: 0.8
   val_split: 0.2

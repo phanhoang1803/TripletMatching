@@ -111,14 +111,14 @@ class BBCNewsDataset(Dataset):
         return len(self.data)
 
 class AugmentedContextDataset(Dataset):
-    def __init__(self, data, transform=None, context_tokenizer=None, caption_tokenizer=None, max_length=512):
+    def __init__(self, data, transform=None, context_tokenizer=None, caption_tokenizer=None, max_length=512, config=None):
         self.data = data
 
         self.transform = transform
         self.context_tokenizer = context_tokenizer
         self.caption_tokenizer = caption_tokenizer
         self.max_length = max_length
-        
+        self.config = config
     def __len__(self):
         return len(self.data)
         
@@ -126,12 +126,11 @@ class AugmentedContextDataset(Dataset):
         item = self.data[idx]  # Ensure self.data is a list of dictionaries
         # Check if item is a dictionary
         if isinstance(item, dict):
-            image_path = item['img_local_path']
+            image_path = os.path.join(self.config.args.data_dir, item['img_local_path'])
         else:
             raise ValueError(f"Expected item {idx} to be a dictionary.")
 
         if not os.path.exists(image_path):
-    
             image = Image.new('RGB', (224, 224), (0, 0, 0))
         else:
             image = Image.open(image_path).convert('RGB')
