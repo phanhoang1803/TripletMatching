@@ -73,7 +73,7 @@ def get_augmented_context_data_loaders(config):
     context_tokenizer = get_context_tokenizer(config)
     caption_tokenizer = get_caption_tokenizer(config)
 
-    if config.debug == True:
+    if config.args.debug == True:
         data = data[:config.data.num_debug_samples]
     
     train_dataset = AugmentedContextDataset(data=data, 

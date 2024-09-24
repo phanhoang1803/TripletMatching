@@ -14,6 +14,7 @@ def parse_args():
     parser.add_argument('--device', default='cuda' if torch.cuda.is_available() else 'cpu', help='device')
     parser.add_argument('--config', default='configs/config.yaml', help='config file path')
     parser.add_argument('--data_dir', required=True, help='path to the data directory')
+    parser.add_argument('--debug', action='store_true', help='debug mode')
     args = parser.parse_args()
     
     return args
