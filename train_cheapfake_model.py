@@ -6,7 +6,7 @@ from src.data.data_loader import get_data_loaders, get_bbc_data_loaders
 import argparse
 from tqdm import tqdm
 import warnings
-
+import torch.nn as nn
 warnings.filterwarnings("ignore")
 
 def parse_args():
@@ -21,6 +21,8 @@ def parse_args():
 
 def compute_accuracy(outputs, labels):
     predictions = torch.argmax(outputs, dim=1)
+    predictions = nn.Sigmoid()(predictions)
+    predictions = np.where(predictions > 0.5, 1, 0)
     correct = (predictions == labels).float()
     accuracy = correct.sum() / len(correct)
     return accuracy.item()
@@ -43,8 +45,8 @@ def train_epoch(model, dataloader, optimizer, scheduler, device):
         total_loss += loss.item()
         total_acc += compute_accuracy(outputs, labels)
         
-    avg_loss = total_loss / len(dataloader)
-    avg_acc = total_acc / len(dataloader)
+    avg_loss = total_loss / len(dataloader) if len(dataloader) > 0 else 0
+    avg_acc = total_acc / len(dataloader) if len(dataloader) > 0 else 0
 
     return avg_loss, avg_acc
 
@@ -62,8 +64,8 @@ def validate(model, dataloader, device):
             total_loss += loss.item()
             total_acc += compute_accuracy(outputs, labels)
 
-    avg_loss = total_loss / len(dataloader)
-    avg_acc = total_acc / len(dataloader)
+    avg_loss = total_loss / len(dataloader) if len(dataloader) > 0 else 0
+    avg_acc = total_acc / len(dataloader) if len(dataloader) > 0 else 0
     return avg_loss, avg_acc
 
 def main():

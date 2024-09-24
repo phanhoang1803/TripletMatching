@@ -51,8 +51,8 @@ def get_bbc_data_loaders(config):
     val_size = len(dataset) - train_size
     train_dataset, val_dataset = torch.utils.data.random_split(dataset, [train_size, val_size])
 
-    train_loader = DataLoader(train_dataset, batch_size=config.train.batch_size, shuffle=True, num_workers=config.train.num_workers, collate_fn=collate_fn, prefetch_factor=2)
-    val_loader = DataLoader(val_dataset, batch_size=config.train.batch_size, shuffle=False, num_workers=config.train.num_workers, collate_fn=collate_fn, prefetch_factor=2)
+    train_loader = DataLoader(train_dataset, batch_size=config.train.batch_size, shuffle=True, num_workers=config.train.num_workers, collate_fn=collate_fn, prefetch_factor=2, drop_last=True)
+    val_loader = DataLoader(val_dataset, batch_size=config.train.batch_size, shuffle=False, num_workers=config.train.num_workers, collate_fn=collate_fn, prefetch_factor=2, drop_last=True)
 
     config.model.context.vocab_size = len(context_tokenizer)
     config.model.caption.vocab_size = len(caption_tokenizer)
@@ -86,8 +86,8 @@ def get_augmented_context_data_loaders(config):
     val_size = len(train_dataset) - train_size
     train_dataset, val_dataset = torch.utils.data.random_split(train_dataset, [train_size, val_size])
 
-    train_loader = DataLoader(train_dataset, batch_size=config.train.batch_size, shuffle=True, num_workers=config.train.num_workers, collate_fn=collate_fn, prefetch_factor=config.train.prefetch_factor)
-    val_loader = DataLoader(val_dataset, batch_size=config.train.batch_size, shuffle=False, num_workers=config.train.num_workers, collate_fn=collate_fn, prefetch_factor=config.train.prefetch_factor)
+    train_loader = DataLoader(train_dataset, batch_size=config.train.batch_size, shuffle=True, num_workers=config.train.num_workers, collate_fn=collate_fn, prefetch_factor=config.train.prefetch_factor, drop_last=True)
+    val_loader = DataLoader(val_dataset, batch_size=config.train.batch_size, shuffle=False, num_workers=config.train.num_workers, collate_fn=collate_fn, prefetch_factor=config.train.prefetch_factor, drop_last=True)
     
     return train_loader, val_loader
     
