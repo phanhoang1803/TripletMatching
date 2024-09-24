@@ -22,8 +22,9 @@ def parse_args():
 def compute_accuracy(outputs, labels):
     predictions = torch.argmax(outputs, dim=1)
     predictions = nn.Sigmoid()(predictions)
+    predictions = predictions.cpu().numpy()
     predictions = np.where(predictions > 0.5, 1, 0)
-    correct = (predictions == labels).float()
+    correct = (predictions == labels.cpu().numpy()).astype(float)
     accuracy = correct.sum() / len(correct)
     return accuracy.item()
 
