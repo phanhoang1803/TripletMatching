@@ -1,3 +1,4 @@
+import os
 import numpy as np
 from omegaconf import OmegaConf
 import torch
@@ -83,9 +84,10 @@ def main():
     
     # Initialize the model, optimizer, and other training parameters
     model = CheapFakeModel(config).to(device)
-    optimizer = torch.optim.Adam(model.parameters(), lr=config.train.learning_rate)
-    scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=7, gamma=0.1)
+    optimizer = torch.optim.Adam(model.parameters(), lr=config.train.learning_rate, weight_decay=config.train.weight_decay)
+    scheduler = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=config.train.num_epochs, eta_min=0)
     
+    os.makedirs('checkpoints', exist_ok=True)
     for epoch in range(config.train.num_epochs):
         train_loss, train_acc = train_epoch(model, train_loader, optimizer, scheduler, device)
         val_loss, val_acc = validate(model, val_loader, device)
